@@ -206,6 +206,16 @@ void DynamicRaveDatabase::ReloadPlugins()
     }
 }
 
+bool ends_with(const std::string& str, const std::string& ending) {
+    if (ending.size() > str.size()) return false;
+    return std::equal(ending.rbegin(), ending.rend(), str.rbegin());
+}
+
+bool starts_with(const std::string& str, const std::string& starting) {
+    if (starting.size() > str.size()) return false;
+    return std::equal(starting.begin(), starting.end(), str.begin());
+}
+
 bool DynamicRaveDatabase::LoadPlugin(const std::string& libraryname)
 {
     // If the libraryname matches any of the existing loaded libraries, then reload it
@@ -214,6 +224,14 @@ bool DynamicRaveDatabase::LoadPlugin(const std::string& libraryname)
         _vPlugins.erase(std::remove_if(_vPlugins.begin(), _vPlugins.end(), [&libraryname](const PluginPtr& plugin) {
             return (plugin->GetPluginName() == libraryname || plugin->GetPluginPath() == libraryname);
         }), _vPlugins.end());
+    }
+    if (!fs::is_regular_file(libraryname)) {
+        // User supplied a name without decorations ('lib' prefix and/or '.so' suffixes)
+        // So we must fill it in for them.
+        fs::path filename(libraryname);
+        if (!filename.has_extension()) {
+            
+        }
     }
     return _LoadPlugin(libraryname);
 }
